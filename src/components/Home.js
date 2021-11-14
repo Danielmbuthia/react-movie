@@ -11,22 +11,26 @@ import Spinner from "./Spinner";
 import {useHomeFetch} from "../hooks/useHomeFetch";  /// custom hook
 // images
 import NoImage from '../images/no_image.jpg';
+import SearchBar from "./SearchBar";
+import Button from "./Button";
 
 
 const Home = () =>{
-  const {state}=useHomeFetch();
+  const {state,loading,error,setSearchTerm,searchTerm,setIsLoadingMore}=useHomeFetch();
   let first_movie = state?.results[0];
 
+    if(error) return <div>Something went wrong.....</div>
  return (
      <>
-         {state?.results[0] ?
+         {!searchTerm && state?.results[0] ?
             <HeroImage
                 image={`${IMAGE_BASE_URL}${BACKDROP_SIZE}${first_movie?.backdrop_path}`}
                 title={first_movie?.original_title}
                 text={first_movie?.overview}/> :
              null
          }
-         <Grid header='Popular Movies'>
+         <SearchBar setSearchTerm={setSearchTerm}/>
+         <Grid header={searchTerm ? 'Search Result':'Popular Movies'}>
              {state?.results.map(movie =>(
                  <Thumb
                      key={movie?.id}
@@ -39,7 +43,10 @@ const Home = () =>{
                  />
              ))}
          </Grid>
-         <Spinner/>
+         {loading && <Spinner/>}
+         {!loading && state?.page < state?.total_pages && (
+             <Button text="Load more " callback={()=>setIsLoadingMore(true)}/>
+         )}
      </>
  )
 }
